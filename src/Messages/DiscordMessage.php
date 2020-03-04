@@ -4,10 +4,10 @@ namespace LucasFormiga\Notifications\Messages;
 
 class DiscordMessage
 {
-    const COLOR_SUCCESS = '44bd32';
-    const COLOR_INFO = '00a8ff';
-    const COLOR_WARNING = 'fbc531';
-    const COLOR_DANGER = 'e84118';
+    const COLOR_SUCCESS = 3066993;
+    const COLOR_INFO = 3447003;
+    const COLOR_WARNING = 15105570;
+    const COLOR_DANGER = 15158332;
 
     private $payload;
 
@@ -61,30 +61,21 @@ class DiscordMessage
      * @param string $color
      * @return self
      */
-    public function card(string $title, string $content, string $color = self::COLOR_INFO): self
+    public function card(string $title, string $content, string $color = self::COLOR_INFO, array $author = null, array $footer = null): self
     {
-        if (!is_null($this->payload['embed'])) {
-            if (count($this->payload['embed']) < 10) {
-                $this->payload['embed'][] = [
-                    'title' => $title,
-                    'description' => $content,
-                    'color' => $color
-                ];
-            } else {
-                $this->payload['embed'][9] = [
-                    'title' => $title,
-                    'description' => $content,
-                    'color' => $color
-                ];
-            }
+        if (
+            isset($this->payload['embeds'])
+            && count($this->payload['embeds']) < 10
+        ) {
+            $this->payload['embeds'][] = $this->embed($title, $content, $color, $author, $footer);
+
+            return $this;
         }
 
-        if (is_null($this->payload['embed'])) {
-            $this->payload['embed'][] = [
-                'title' => $title,
-                'description' => $content,
-                'color' => $color
-            ];
+        if (!isset($this->payload['embeds'])) {
+            $this->payload['embeds'][] = $this->embed($title, $content, $color, $author, $footer);
+
+            return $this;
         }
 
         return $this;
@@ -95,31 +86,9 @@ class DiscordMessage
      * @param string $content
      * @return self
      */
-    public function success(string $title, string $content): self
+    public function success(string $title, string $content, array $author = null, array $footer = null): self
     {
-        if (!is_null($this->payload['embed'])) {
-            if (count($this->payload['embed']) < 10) {
-                $this->payload['embed'][] = [
-                    'title' => $title,
-                    'description' => $content,
-                    'color' => self::COLOR_SUCCESS
-                ];
-            } else {
-                $this->payload['embed'][9] = [
-                    'title' => $title,
-                    'description' => $content,
-                    'color' => self::COLOR_SUCCESS
-                ];
-            }
-        }
-
-        if (is_null($this->payload['embed'])) {
-            $this->payload['embed'][] = [
-                'title' => $title,
-                'description' => $content,
-                'color' => self::COLOR_SUCCESS
-            ];
-        }
+        $this->card($title, $content, self::COLOR_SUCCESS, $author, $footer);
 
         return $this;
     }
@@ -129,31 +98,9 @@ class DiscordMessage
      * @param string $content
      * @return self
      */
-    public function info(string $title, string $content): self
+    public function info(string $title, string $content, array $author = null, array $footer = null): self
     {
-        if (!is_null($this->payload['embed'])) {
-            if (count($this->payload['embed']) < 10) {
-                $this->payload['embed'][] = [
-                    'title' => $title,
-                    'description' => $content,
-                    'color' => self::COLOR_INFO
-                ];
-            } else {
-                $this->payload['embed'][9] = [
-                    'title' => $title,
-                    'description' => $content,
-                    'color' => self::COLOR_INFO
-                ];
-            }
-        }
-
-        if (is_null($this->payload['embed'])) {
-            $this->payload['embed'][] = [
-                'title' => $title,
-                'description' => $content,
-                'color' => self::COLOR_INFO
-            ];
-        }
+        $this->card($title, $content, self::COLOR_INFO, $author, $footer);
 
         return $this;
     }
@@ -163,31 +110,9 @@ class DiscordMessage
      * @param string $content
      * @return self
      */
-    public function warning(string $title, string $content): self
+    public function warning(string $title, string $content, array $author = null, array $footer = null): self
     {
-        if (!is_null($this->payload['embed'])) {
-            if (count($this->payload['embed']) < 10) {
-                $this->payload['embed'][] = [
-                    'title' => $title,
-                    'description' => $content,
-                    'color' => self::COLOR_WARNING
-                ];
-            } else {
-                $this->payload['embed'][9] = [
-                    'title' => $title,
-                    'description' => $content,
-                    'color' => self::COLOR_WARNING
-                ];
-            }
-        }
-
-        if (is_null($this->payload['embed'])) {
-            $this->payload['embed'][] = [
-                'title' => $title,
-                'description' => $content,
-                'color' => self::COLOR_WARNING
-            ];
-        }
+        $this->card($title, $content, self::COLOR_WARNING, $author, $footer);
 
         return $this;
     }
@@ -197,33 +122,30 @@ class DiscordMessage
      * @param string $content
      * @return self
      */
-    public function danger(string $title, string $content): self
+    public function danger(string $title, string $content, array $author = null, array $footer = null): self
     {
-        if (!is_null($this->payload['embed'])) {
-            if (count($this->payload['embed']) < 10) {
-                $this->payload['embed'][] = [
-                    'title' => $title,
-                    'description' => $content,
-                    'color' => self::COLOR_DANGER
-                ];
-            } else {
-                $this->payload['embed'][9] = [
-                    'title' => $title,
-                    'description' => $content,
-                    'color' => self::COLOR_DANGER
-                ];
-            }
-        }
-
-        if (is_null($this->payload['embed'])) {
-            $this->payload['embed'][] = [
-                'title' => $title,
-                'description' => $content,
-                'color' => self::COLOR_DANGER
-            ];
-        }
+        $this->card($title, $content, self::COLOR_DANGER, $author, $footer);
 
         return $this;
+    }
+
+    private function embed(string $title, string $content, string $color, array $author = null, array $footer = null)
+    {
+        $data = [
+            'title' => $title,
+            'description' => $content,
+            'color' => (integer) $color
+        ];
+
+        if (!is_null($author)) {
+            $data['author'] = $author;
+        }
+
+        if (!is_null($footer)) {
+            $data['footer'] = $footer;
+        }
+
+        return $data;
     }
 
     /**
