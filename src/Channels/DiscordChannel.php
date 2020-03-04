@@ -19,7 +19,11 @@ class DiscordChannel
      */
     public function __construct(HttpClient $client, string $url)
     {
-        $this->client = $client;
+        $this->client = new $client([
+            'headers' => [
+                'Content-Type' => 'application/json'
+            ]
+        ]);
         $this->url = $url;
     }
 
@@ -33,7 +37,9 @@ class DiscordChannel
         $payload = $this->build($message->toArray());
 
         try {
-            $response = $this->client->post($this->url, $payload);
+            $response = $this->client->post($this->url, [
+                'json' => $payload
+            ]);
         } catch (ClientException $ex) {
             throw $ex;
         } catch (Exception $ex) {
@@ -49,19 +55,19 @@ class DiscordChannel
 
         $data->put('content', $payload['content'] ?? '');
 
-        if (!is_null($payload['username'])) {
+        if (isset($payload['username'])) {
             $data->put('username', $payload['username']);
         }
 
-        if (!is_null($payload['avatar_url'])) {
+        if (isset($payload['avatar_url'])) {
             $data->put('avatar_url', $payload['avatar_url']);
         }
 
-        if (!is_null($payload['tts'])) {
+        if (isset($payload['tts'])) {
             $data->put('tts', $payload['tts']);
         }
 
-        if (!is_null($payload['embeds'])) {
+        if (isset($payload['embeds'])) {
             $data->put('embeds', $payload['embeds']);
         }
 
